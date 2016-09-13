@@ -6,12 +6,11 @@ defmodule SmppexWeb do
   def start(_type, _args) do
     import Supervisor.Spec
 
+    SmppexWeb.MC.start
+
     # Define workers and child supervisors to be supervised
     children = [
-      # Start the endpoint when the application starts
       supervisor(SmppexWeb.Endpoint, []),
-      # Start your own worker by calling: SmppexWeb.Worker.start_link(arg1, arg2, arg3)
-      # worker(SmppexWeb.Worker, [arg1, arg2, arg3]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
