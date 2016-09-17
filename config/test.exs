@@ -8,3 +8,7 @@ config :smppex_web, SmppexWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :smppex_web, SmppexWeb.MC,
+  port: 2776,
+  max_connections: 30
