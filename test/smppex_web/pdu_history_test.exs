@@ -54,7 +54,7 @@ defmodule SmppexWeb.PduHistoryTest do
     assert :ok == PduHistory.register_pdu(server, :pdu1)
     assert :ok == PduHistory.register_pdu(server, :pdu2)
 
-    assert {:ok, [:pdu2, :pdu1]} == PduHistory.history(server, "system_id")
+    assert {:ok, [{2, :pdu2}, {1, :pdu1}]} == PduHistory.history(server, "system_id")
   end
 
   test "history: unknown session" do
@@ -98,7 +98,7 @@ defmodule SmppexWeb.PduHistoryTest do
     assert :ok == PduHistory.register_pdu(server, :pdu1)
     assert :ok == PduHistory.register_pdu(server, :pdu2)
 
-    assert [{"system_id", :pdu2}, {"system_id", :pdu1}] == Agent.get(pid, fn(changes) -> changes end)
+    assert [{"system_id", {2, :pdu2}}, {"system_id", {1, :pdu1}}] == Agent.get(pid, fn(changes) -> changes end)
   end
 
 end

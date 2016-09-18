@@ -8,7 +8,8 @@ defmodule SmppexWeb.PduHistory do
     on_sessions_changed: nil,
     on_new_pdu: nil,
     sid_by_pid: %{},
-    history_by_sid: %{}
+    history_by_sid: %{},
+    last_id: 0
   ]
 
   @history_limit 1000
@@ -119,11 +120,15 @@ defmodule SmppexWeb.PduHistory do
 
   defp do_register_pdu(pid, pdu_info, st) do
     system_id = Map.get(st.sid_by_pid, pid)
-    new_history = append_history(st.history_by_sid[system_id], pdu_info)
+    id = st.last_id + 1
+    history_item = {id, pdu_info}
+    new_history = append_history(st.history_by_sid[system_id], history_item)
+
     new_st = %PduHistory{ st |
-      history_by_sid: Map.put(st.history_by_sid, system_id, new_history)
+      history_by_sid: Map.put(st.history_by_sid, system_id, new_history),
+      last_id: id
     }
-    st.on_new_pdu.({system_id, pdu_info})
+    st.on_new_pdu.({system_id, history_item})
     new_st
   end
 
