@@ -13,8 +13,8 @@ defmodule SmppexWeb.PduHistory do
 
   @history_limit 1000
 
-  def start_link(on_sessions_changed, on_new_pdu) do
-    GenServer.start_link(__MODULE__, [on_sessions_changed, on_new_pdu], name: __MODULE__)
+  def start_link(on_sessions_changed, on_new_pdu, opts \\ []) do
+    GenServer.start_link(__MODULE__, [on_sessions_changed, on_new_pdu], opts)
   end
 
   def init([on_sessions_changed, on_new_pdu]) do
@@ -24,16 +24,30 @@ defmodule SmppexWeb.PduHistory do
     }}
   end
 
-  def register_session(system_id) do
-    GenServer.call(__MODULE__, {:register_session, self(), system_id})
+  @type server :: atom | pid
+
+  @spec register_session(server, system_id :: String.t) :: :ok | {:error, :session_alredy_registered} | {:error, :system_id_alredy_registered}
+
+  def register_session(server, system_id) do
+    GenServer.call(server, {:register_session, self(), system_id})
   end
 
-  def register_pdu(pdu_info) do
-    GenServer.call(__MODULE__, {:register_pdu, self(), pdu_info})
+  @spec register_pdu(server, term) :: :ok | {:error, :unknown_session}
+
+  def register_pdu(server, pdu_info) do
+    GenServer.call(server, {:register_pdu, self(), pdu_info})
   end
 
-  def history(system_id) do
-    GenServer.call(__MODULE__, {:history, system_id})
+  @spec history(server, system_id :: String.t) :: {:ok, [term]} | {:error, :unknown_session}
+
+  def history(server, system_id) do
+    GenServer.call(server, {:history, system_id})
+  end
+
+  @spec system_ids(server) :: [String.t]
+
+  def system_ids(server) do
+    GenServer.call(server, :system_ids)
   end
 
   def handle_call({:register_session, pid, system_id}, _from, st) do
@@ -63,6 +77,10 @@ defmodule SmppexWeb.PduHistory do
     end
   end
 
+  def handle_call(:system_ids, _from, st) do
+    {:reply, do_get_system_ids(st), st}
+  end
+
   defp do_register_session(pid, system_id, st) do
     new_st = %PduHistory{ st |
       sid_by_pid: Map.put(st.sid_by_pid, pid, system_id),
@@ -74,16 +92,16 @@ defmodule SmppexWeb.PduHistory do
   end
 
   defp notify_system_ids(st) do
-    st.on_sessions_changed.(system_ids(st))
+    st.on_sessions_changed.(do_get_system_ids(st))
   end
 
-  defp system_ids(st) do
+  defp do_get_system_ids(st) do
     Map.keys(st.history_by_sid)
   end
 
   def handle_info({:DOWN, _ref, :process, session_pid, _reason}, st) do
     if Map.has_key?(st.sid_by_pid, session_pid) do
-      do_unregister_session(session_pid, st)
+      {:noreply, do_unregister_session(session_pid, st)}
     else
       {:noreply, st}
     end
@@ -102,7 +120,7 @@ defmodule SmppexWeb.PduHistory do
   defp do_register_pdu(pid, pdu_info, st) do
     system_id = Map.get(st.sid_by_pid, pid)
     new_history = append_history(st.history_by_sid[system_id], pdu_info)
-    new_st = %PduHistory{
+    new_st = %PduHistory{ st |
       history_by_sid: Map.put(st.history_by_sid, system_id, new_history)
     }
     st.on_new_pdu.({system_id, pdu_info})
