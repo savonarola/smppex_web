@@ -33,11 +33,15 @@ defmodule SmppexWeb.PduHistory do
     GenServer.call(server, {:register_session, self(), system_id})
   end
 
+  def register_session(system_id), do: PduHistory.register_session(PduHistory, system_id)
+
   @spec register_pdu(server, term) :: :ok | {:error, :unknown_session}
 
   def register_pdu(server, pdu_info) do
     GenServer.call(server, {:register_pdu, self(), pdu_info})
   end
+
+  def register_pdu(pdu_info), do: register_pdu(PduHistory, pdu_info)
 
   @spec history(server, system_id :: String.t) :: {:ok, [term]} | {:error, :unknown_session}
 
@@ -45,11 +49,15 @@ defmodule SmppexWeb.PduHistory do
     GenServer.call(server, {:history, system_id})
   end
 
+  def history(system_id), do: history(PduHistory, system_id)
+
   @spec system_ids(server) :: [String.t]
 
   def system_ids(server) do
     GenServer.call(server, :system_ids)
   end
+
+  def system_ids, do: system_ids(PduHistory)
 
   def handle_call({:register_session, pid, system_id}, _from, st) do
     cond do

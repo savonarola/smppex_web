@@ -6,6 +6,7 @@ defmodule SmppexWeb.MC do
   alias SMPPEX.Pdu
   alias SMPPEX.Pdu.Factory
   alias SMPPEX.Pdu.Errors
+  alias SmppexWeb.PduHistory
 
   @system_id "smppex_web"
 
@@ -47,7 +48,7 @@ defmodule SmppexWeb.MC do
       st
     else
       system_id = Pdu.field(pdu, :system_id)
-      case SmppexWeb.PduHistory.register_session(PduHistory, system_id) do
+      case PduHistory.register_session(system_id) do
         :ok ->
           reply_bind(pdu, :ROK)
           %{ st | bound: true }
@@ -91,7 +92,7 @@ defmodule SmppexWeb.MC do
   end
 
   defp do_save_pdu(pdu_info) do
-    SmppexWeb.PduHistory.register_pdu(PduHistory, pdu_info)
+    PduHistory.register_pdu(pdu_info)
   end
 
 end

@@ -5,8 +5,14 @@ defmodule SmppexWeb.MCTest do
   alias SMPPEX.ESME.Sync, as: ESME
   alias SMPPEX.Pdu
   alias SMPPEX.Pdu.Factory
+  alias SmppexWeb.PduHistory
+
+  def wait do
+    :timer.sleep(20)
+  end
 
   def connect do
+    wait
     {:ok, esme} = ESME.start_link("localhost", Application.get_env(:smppex_web, SmppexWeb.MC)[:port])
     esme
   end
@@ -16,7 +22,7 @@ defmodule SmppexWeb.MCTest do
     {:ok, bind_resp} = ESME.request(esme, Factory.bind_transmitter("system_id", "pass"))
 
     assert Pdu.success_resp?(bind_resp)
-    assert SmppexWeb.PduHistory.system_ids(PduHistory) == ["system_id"]
+    assert PduHistory.system_ids == ["system_id"]
   end
 
   test "unbind" do
@@ -27,9 +33,9 @@ defmodule SmppexWeb.MCTest do
 
     ESME.stop(esme)
 
-    :timer.sleep(10)
+    wait
 
-    assert SmppexWeb.PduHistory.system_ids(PduHistory) == []
+    assert PduHistory.system_ids == []
   end
 
   test "bind with same system_id" do
@@ -65,7 +71,7 @@ defmodule SmppexWeb.MCTest do
       {_, {:in, pdu3}},
       {_, {:out, pdu2}},
       {_, {:in, pdu1}}
-    ]} = SmppexWeb.PduHistory.history(PduHistory, "system_id4")
+    ]} = PduHistory.history("system_id4")
 
     assert Pdu.command_name(pdu4) == :submit_sm_resp
     assert Pdu.command_name(pdu3) == :submit_sm
