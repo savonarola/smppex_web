@@ -18,24 +18,8 @@ import "phoenix_html"
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-import socket from "./socket"
-
 import {SystemIds} from "./system_ids"
-let system_ids = new SystemIds([])
+import React from "react"
+import ReactDOM from "react-dom"
 
-import {SystemIds as SystemIdsUI} from "./ui/system_ids"
-let system_ids_ui = new SystemIdsUI(document.getElementById("system_ids"), system_ids)
-
-let channel = socket.channel("smpp_connections:list", {})
-channel.join()
-    .receive("ok", resp => {
-        system_ids.update(resp.system_ids)
-        system_ids_ui.render()
-    })
-    .receive("error", resp => { console.log("Unable to join", resp) })
-
-channel.on("system_ids_updated", payload => {
-    system_ids.update(payload.system_ids)
-    system_ids_ui.render()
-})
-
+ReactDOM.render(<SystemIds/>, document.getElementById('system-ids'))
