@@ -4,27 +4,27 @@ import socket from "./socket"
 export class SystemIds extends React.Component {
     constructor(props) {
         super(props);
+        this.channel = socket.channel("smppConnections:list", {});
         this.state = {
-            channel: socket.channel("smppConnections:list", {}),
             systemIds: [],
             selected: null
         };
     }
 
     componentDidMount() {
-        this.state.channel.join()
+        this.channel.join()
             .receive("ok", resp => {
                 this.setState({systemIds: resp.systemIds});
             })
             .receive("error", resp => { console.log("Unable to join", resp) });
 
-        this.state.channel.on("systemIdsUpdated", payload => {
+        this.channel.on("systemIdsUpdated", payload => {
             this.setState({systemIds: payload.systemIds})
         });
     }
 
     componentWillUnmount() {
-        this.state.channel.leave();
+        this.channel.leave();
     }
 
     handleClick(systemId) {
