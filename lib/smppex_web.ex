@@ -6,10 +6,12 @@ defmodule SmppexWeb do
 
     SmppexWeb.MC.start
 
-    dummy = fn(_) -> :ok end
-
     children = [
-      worker(SmppexWeb.PduHistory, [&SmppexWeb.SmppConnectionsChannel.broadcast_update/1, dummy, [name: SmppexWeb.PduHistory]]),
+      worker(SmppexWeb.PduHistory, [
+        &SmppexWeb.SmppConnectionsChannel.broadcast_update/1,
+        &SmppexWeb.SmppConnectionHistoryChannel.broadcast_update/1,
+        [name: SmppexWeb.PduHistory]
+      ]),
       supervisor(SmppexWeb.Endpoint, []),
     ]
 

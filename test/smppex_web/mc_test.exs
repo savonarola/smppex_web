@@ -67,10 +67,10 @@ defmodule SmppexWeb.MCTest do
     {:ok, _} = ESME.request(esme, submit_sm)
 
     assert {:ok, [
-      {_, {:out, pdu4}},
-      {_, {:in, pdu3}},
-      {_, {:out, pdu2}},
-      {_, {:in, pdu1}}
+      {_, _, {:out, pdu4}},
+      {_, _, {:in, pdu3}},
+      {_, _, {:out, pdu2}},
+      {_, _, {:in, pdu1}}
     ]} = PduHistory.history("system_id4")
 
     assert Pdu.command_name(pdu4) == :submit_sm_resp

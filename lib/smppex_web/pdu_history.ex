@@ -129,7 +129,8 @@ defmodule SmppexWeb.PduHistory do
   defp do_register_pdu(pid, pdu_info, st) do
     system_id = Map.get(st.sid_by_pid, pid)
     id = st.last_id + 1
-    history_item = {id, pdu_info}
+    time = :erlang.system_time(:milli_seconds)
+    history_item = {id, time, pdu_info}
     new_history = append_history(st.history_by_sid[system_id], history_item)
 
     new_st = %PduHistory{ st |

@@ -66,6 +66,6 @@ exports.config = {
 
   npm: {
     enabled: true,
-    whitelist: ["phoenix", "phoenix_html", "react", "react-dom"]
+    whitelist: ["phoenix", "phoenix_html", "react", "react-dom", "moment"]
   }
 };

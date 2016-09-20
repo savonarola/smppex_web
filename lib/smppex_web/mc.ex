@@ -24,16 +24,20 @@ defmodule SmppexWeb.MC do
     }}
   end
 
+  def handle_resp(pdu, _original_pdu, st) do
+    do_save_pdu({:in, pdu})
+    st
+  end
+
   def handle_pdu(pdu, st) do
     new_st = case Pdu.command_name(pdu) do
       :bind_transmitter -> do_handle_bind(pdu, st)
       :bind_receiver -> do_handle_bind(pdu, st)
       :bind_transceiver -> do_handle_bind(pdu, st)
       :submit_sm -> do_handle_submit_sm(pdu, st)
-      :enqure_link -> do_handle_enquire_link(pdu, st)
+      :enquire_link -> do_handle_enquire_link(pdu, st)
       _ -> st
     end
-    do_save_pdu({:in, pdu})
     new_st
   end
 
@@ -50,6 +54,7 @@ defmodule SmppexWeb.MC do
       system_id = Pdu.field(pdu, :system_id)
       case PduHistory.register_session(system_id) do
         :ok ->
+          do_save_pdu({:in, pdu})
           reply_bind(pdu, :ROK)
           %{ st | bound: true }
         {:error, _} ->
@@ -72,12 +77,14 @@ defmodule SmppexWeb.MC do
   defp bind_resp_command_id(pdu), do: 0x80000000 + Pdu.command_id(pdu)
 
   def do_handle_enquire_link(pdu, st) do
+    do_save_pdu({:in, pdu})
     MC.reply(self, pdu, Factory.enquire_link_resp)
     st
   end
 
   def do_handle_submit_sm(pdu, st) do
     if st[:bound] do
+      do_save_pdu({:in, pdu})
       code = Errors.code_by_name(:ROK)
       msg_id = st[:last_msg_id] + 1
       resp = Factory.submit_sm_resp(code, to_string(msg_id))

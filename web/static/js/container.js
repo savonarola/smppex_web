@@ -18,7 +18,9 @@ export class Container extends React.Component {
         return (
             <div>
                 <SystemIds systemIdSelected={this.systemIdSelected.bind(this)}/>
-                <History systemId={this.state.selected}/>
+                <div key={this.state.selected}>
+                    <History systemId={this.state.selected}/>
+                </div>
             </div>
         );
     }
