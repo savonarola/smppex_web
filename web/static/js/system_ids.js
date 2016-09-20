@@ -5,31 +5,43 @@ export class SystemIds extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            channel: socket.channel("smpp_connections:list", {}),
-            system_ids: []
-        }
+            channel: socket.channel("smppConnections:list", {}),
+            systemIds: [],
+            selected: null
+        };
     }
 
     componentDidMount() {
         this.state.channel.join()
             .receive("ok", resp => {
-                this.setState({system_ids: resp.system_ids});
+                this.setState({systemIds: resp.systemIds});
             })
-            .receive("error", resp => { console.log("Unable to join", resp) })
+            .receive("error", resp => { console.log("Unable to join", resp) });
 
-        this.state.channel.on("system_ids_updated", payload => {
-            this.setState({system_ids: payload.system_ids})
-        })
+        this.state.channel.on("systemIdsUpdated", payload => {
+            this.setState({systemIds: payload.systemIds})
+        });
+    }
+
+    componentWillUnmount() {
+        this.state.channel.leave();
+    }
+
+    handleClick(systemId) {
+        this.props.systemIdSelected(systemId);
+        this.setState({selected: systemId});
     }
 
     render() {
         return (
             <ul className="nav nav-pills">
             {
-                this.state.system_ids.map((system_id) => {
+                this.state.systemIds.map((systemId) => {
+                    let boundClick = this.handleClick.bind(this, systemId);
+                    let selected = systemId == this.state.selected
                     return (
-                        <li key={system_id}>
-                            <a href="#">{system_id}</a>
+                        <li key={systemId} className={selected ? "active" : ""}>
+                            <a onClick={boundClick}>{systemId}</a>
                         </li>
                     );
                 })
@@ -38,3 +50,5 @@ export class SystemIds extends React.Component {
         );
     }
 }
+
+SystemIds.propTypes = { systemIdSelected: React.PropTypes.func.isRequired };

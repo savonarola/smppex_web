@@ -3,7 +3,7 @@ defmodule SmppexWeb.SmppConnectionHistoryChannel do
 
   alias SmppexWeb.PduHistory
 
-  def join("smpp_connection_history:" <> system_id, _message, socket) do
+  def join("smppConnectionHistory:" <> system_id, _message, socket) do
     case PduHistory.history(system_id) do
       {:ok, _} -> {:ok, socket}
       {:error, :unknown_session} = err -> err

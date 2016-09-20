@@ -3,14 +3,14 @@ defmodule SmppexWeb.SmppConnectionsChannel do
 
   alias SmppexWeb.PduHistory
 
-  @topic "smpp_connections:list"
+  @topic "smppConnections:list"
 
   def broadcast_update(system_ids) do
-    SmppexWeb.Endpoint.broadcast!(@topic, "system_ids_updated", %{system_ids: system_ids})
+    SmppexWeb.Endpoint.broadcast!(@topic, "systemIdsUpdated", %{systemIds: system_ids})
   end
 
   def join(@topic, _message, socket) do
-    {:ok, %{system_ids: PduHistory.system_ids}, socket}
+    {:ok, %{systemIds: PduHistory.system_ids}, socket}
   end
 
 end
