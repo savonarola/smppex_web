@@ -25,4 +25,5 @@ RUN mix local.hex --force
 RUN mix local.rebar --force
 
 RUN apt-get install -y npm
+RUN apt-get install -y nodejs-legacy
 

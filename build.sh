@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 RELEASE=$1
 
 if [ "x$RELEASE" == "x" ]
@@ -16,7 +18,7 @@ SMPPEX_WEB=$(pwd)
 RELEASE_DIR_FULL=$SMPPEX_WEB/$RELEASE_DIR
 
 mkdir -p releases
-git clone $REMOTE $RELEASE_DIR
+git clone $REMOTE $RELEASE_DI
 cp config/prod.secret.exs $RELEASE_DIR/config/prod.secret.exs
 
 docker build -t $IMAGE_TAG .

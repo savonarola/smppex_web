@@ -15,7 +15,7 @@ assets:
 	MIX_ENV=prod $(MIX) phoenix.digest
 
 pack:
-	tar czf --exclude node_modules project.tar.gz .
+	tar czf --exclude node_modules --exclude project.tar.gz project.tar.gz .
 
 release: clean initial assets pack
 
