@@ -17,6 +17,7 @@ RELEASE_DIR_FULL=$SMPPEX_WEB/$RELEASE_DIR
 
 mkdir -p releases
 git clone $REMOTE $RELEASE_DIR
+cp config/prod.secret.exs $RELEASE_DIR/config/prod.secret.exs
 
 docker build -t $IMAGE_TAG .
 docker run -v $RELEASE_DIR_FULL:/smppex_web -w /smppex_web $IMAGE_TAG make release

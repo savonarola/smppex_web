@@ -1,5 +1,5 @@
 MIX=mix
-BRUNCH=brunch
+NPM=npm
 
 clean:
 	$(MIX) clean
@@ -10,7 +10,8 @@ initial:
 	MIX_ENV=prod $(MIX) compile
 
 assets:
-	$(BRUNCH) build --production
+	$(NPM) install
+	node_modules/brunch/bin/brunch build --production
 	MIX_ENV=prod $(MIX) phoenix.digest
 
 pack:
