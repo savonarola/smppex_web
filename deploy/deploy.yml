@@ -1,0 +1,26 @@
+- user: av
+  hosts: all
+  gather_facts: no
+  tasks:
+  - git:
+      repo: git@github.com:savonarola/smppex_web.git
+      dest: smppex_web
+      accept_hostkey: yes
+      version: master
+      force: yes
+  - file: path=smppex_web/log state=directory mode=0755
+  - file: path=smppex_web/run state=directory mode=0755
+  - shell: bundle install --deployment chdir=pulse-meter.rubybox.ru
+
+
+- user: av
+  become: yes
+  hosts: all
+  gather_facts: no
+  tasks:
+  - file:
+      src: /home/av/smppex_web/deploy/smppex_web.service
+      dest: /etc/systemd/system/smppex_web.service
+      state: link
+  - shell: systemctl restart smppex_web
+
