@@ -1,27 +1,16 @@
-#!/bin/sh
+#!/bin/bash
+git clone smppex_web.git /tmp/smppex_web
+cp prod.secret.exs /tmp/smppex_web/config/prod.secret.exs
 
-set -e
+cd /tmp/smppex_web
 
-RELEASE=$1
+mix deps.get --only prod
+MIX_ENV=prod mix compile
+npm install
+node_modules/brunch/bin/brunch build --production
+MIX_ENV=prod mix phoenix.digest
 
-if [ "x$RELEASE" == "x" ]
-then
-    echo "Release name not set"
-    exit 1
-fi
+cd /smppex_web
 
-RELEASE_DIR=releases/$1
-REMOTE=git@github.com:savonarola/smppex_web.git
-IMAGE_TAG=smppex_web
-
-SMPPEX_WEB=$(pwd)
-RELEASE_DIR_FULL=$SMPPEX_WEB/$RELEASE_DIR
-
-mkdir -p releases
-git clone $REMOTE $RELEASE_DI
-cp config/prod.secret.exs $RELEASE_DIR/config/prod.secret.exs
-
-docker build -t $IMAGE_TAG .
-docker run -v $RELEASE_DIR_FULL:/smppex_web -w /smppex_web $IMAGE_TAG make release
-
+tar czf smppex_web.tar.gz /tmp/smppex_web --exclude=node_modules
 
