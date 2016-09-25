@@ -31,10 +31,14 @@
     become: yes
     when: elixir_check_deb.rc == 1
 
+  - shell: mix local.hex --force
+
   - file:
       src: /home/av/smppex_web/current/deploy/smppex_web.service
       dest: /etc/systemd/system/smppex_web.service
       state: link
+    become: yes
 
   - shell: systemctl restart smppex_web
+    become: yes
 
