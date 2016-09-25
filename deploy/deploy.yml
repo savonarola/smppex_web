@@ -2,25 +2,39 @@
   hosts: all
   gather_facts: no
   tasks:
-  - git:
-      repo: git@github.com:savonarola/smppex_web.git
-      dest: smppex_web
-      accept_hostkey: yes
-      version: master
-      force: yes
-  - file: path=smppex_web/log state=directory mode=0755
-  - file: path=smppex_web/run state=directory mode=0755
-  - shell: bundle install --deployment chdir=pulse-meter.rubybox.ru
+  - file: path=/home/av/smppex_web/{{release_dir}} state=directory
 
+  - unarchive: src=../{{ release_dir }}/smppex_web.tar.gz dest=/home/av/smppex_web/{{release_dir}} creates=yes
 
-- user: av
-  become: yes
-  hosts: all
-  gather_facts: no
-  tasks:
   - file:
-      src: /home/av/smppex_web/deploy/smppex_web.service
+      src: /home/av/smppex_web/{{release_dir}}/smppex_web
+      dest: /home/av/smppex_web/current
+      state: link
+
+  - command: dpkg-query -W elixir
+    register: elixir_check_deb
+    failed_when: elixir_check_deb.rc > 1
+    changed_when: elixir_check_deb.rc == 1
+
+  - get_url: url=https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb dest=/tmp/erlang-solutions_1.0_all.deb
+    when: elixir_check_deb.rc == 1
+
+  - apt: deb=/tmp/erlang-solutions_1.0_all.deb
+    become: yes
+    when: elixir_check_deb.rc == 1
+
+  - apt: update_cache=yes
+    become: yes
+    when: elixir_check_deb.rc == 1
+
+  - apt: name=elixir state=present
+    become: yes
+    when: elixir_check_deb.rc == 1
+
+  - file:
+      src: /home/av/smppex_web/current/deploy/smppex_web.service
       dest: /etc/systemd/system/smppex_web.service
       state: link
+
   - shell: systemctl restart smppex_web
 

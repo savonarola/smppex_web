@@ -16,6 +16,7 @@ IMAGE_TAG=smppex_web
 
 CWD=$(pwd)
 
+rm -rf $RELEASE_DIR
 mkdir -p $RELEASE_DIR
 
 git clone $REMOTE $RELEASE_DIR/smppex_web.git --bare
