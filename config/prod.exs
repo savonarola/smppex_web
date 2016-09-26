@@ -9,7 +9,11 @@ config :logger, level: :info
 
 import_config "prod.secret.exs"
 
-config :logger, :console, format: "[$level] $message\n"
+config :logger, backends: [{LoggerFileBackend, :info_log}]
+config :logger, :info_log,
+  path: "log/info.log",
+  level: :info,
+  format: "[$level] $message\n"
 
 config :smppex_web, SmppexWeb.MC,
   port: 2775,

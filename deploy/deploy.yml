@@ -15,6 +15,8 @@
       dest: "{{ current_dir }}"
       state: link
 
+  - file: path={{ current_dir }}/log state=directory
+
   - command: dpkg-query -W elixir
     register: elixir_check_deb
     failed_when: elixir_check_deb.rc > 1
