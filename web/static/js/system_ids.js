@@ -34,21 +34,47 @@ export class SystemIds extends React.Component {
 
     render() {
         return (
-            <ul className="nav nav-pills">
-            {
-                this.state.systemIds.map((systemId) => {
-                    let boundClick = this.handleClick.bind(this, systemId);
-                    let selected = systemId == this.state.selected
-                    return (
-                        <li key={systemId} className={selected ? "active" : ""}>
-                            <a onClick={boundClick}>{systemId}</a>
-                        </li>
-                    );
-                })
-            }
-            </ul>
+            <div>
+                <p className="bg-info" id="help-banner">
+                {this.helpBanner()}
+                </p>
+                <ul className="nav nav-pills">
+                {
+                    this.state.systemIds.map((systemId) => {
+                        let boundClick = this.handleClick.bind(this, systemId);
+                        let selected = systemId == this.state.selected
+                        return (
+                            <li key={systemId} className={selected ? "active" : ""}>
+                                <a onClick={boundClick}>{systemId}</a>
+                            </li>
+                        );
+                    })
+                }
+                </ul>
+            </div>
         );
     }
+
+    sessionsPresent() {
+        return this.state.systemIds.length > 0;
+    }
+
+    helpBanner() {
+        if(this.sessionsPresent()) {
+            return (
+                <span>
+                    Select one of the SMPP sessions below to watch its realtime PDU log or establish a new SMPP session by connecting to <code>smppex.rubybox.ru:2775</code> and binding in any mode with any credentials
+                </span>
+            );
+        } else {
+            return (
+                <span>
+                    No SMPP sessions established. You may establish a new SMPP session by connecting to <code>smppex.rubybox.ru:2775</code> and binding in any mode with any credentials
+                </span>
+            );
+        }
+    }
+
 }
 
 SystemIds.propTypes = { systemIdSelected: React.PropTypes.func.isRequired };
