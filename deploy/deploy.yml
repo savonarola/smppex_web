@@ -2,20 +2,18 @@
   hosts: all
   gather_facts: no
   vars:
-    release_dir: /home/av/smppex_web/{{local_release_dir}}
-    current_dir: /home/av/smppex_web/current
+    smppex_dir: /home/av/smppex_web
+    release_dir: "{{smppex_dir}}/{{local_release_dir}}"
+    current_dir: "{{smppex_dir}}/current"
 
   tasks:
-  - file: path={{ release_dir }} state=directory
+  - file: path={{release_dir}} state=directory
 
-  - unarchive: src=../{{ local_release_dir }}/smppex_web.tar.gz dest={{release_dir}} creates=yes
+  - unarchive: src=../{{local_release_dir}}/smppex_web.tar.gz dest={{release_dir}} creates=yes
 
-  - file:
-      src: "{{release_dir}}/smppex_web"
-      dest: "{{ current_dir }}"
-      state: link
-
-  - file: path={{ current_dir }}/log state=directory
+  - file: src={{release_dir}}/smppex_web dest={{current_dir}} state=link
+  - file: path={{smppex_dir}}/log state=directory
+  - file: src={{smppex_dir}}/log dest={{current_dir}}/log state=link
 
   - command: dpkg-query -W elixir
     register: elixir_check_deb
@@ -41,13 +39,13 @@
     when: elixir_check_deb.rc == 1
 
   - file:
-      src: "{{ current_dir }}/deploy/smppex_web.service"
+      src: "{{current_dir}}/deploy/smppex_web.service"
       dest: /etc/systemd/system/smppex_web.service
       state: link
     become: yes
 
   - file:
-      src: "{{ current_dir }}/deploy/smppex.rubybox.ru.conf"
+      src: "{{current_dir}}/deploy/smppex.rubybox.ru.conf"
       dest: /etc/nginx/sites-available/smppex.rubybox.ru.conf
       state: link
     become: yes
@@ -66,4 +64,3 @@
 
   - shell: systemctl restart smppex_web
     become: yes
-
