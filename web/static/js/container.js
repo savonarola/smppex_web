@@ -19,12 +19,21 @@ export class Container extends React.Component {
         return (
             <div>
                 <SystemIds systemIdSelected={this.systemIdSelected.bind(this)}/>
-                <div key={this.state.selected}>
-                    <History systemId={this.state.selected}/>
-                </div>
+                {this.history()}
                 {this.copy()}
             </div>
         );
+    }
+
+    history() {
+      if(!this.state.selected) return null;
+
+      return (
+          <div key={this.state.selected}>
+              <History systemId={this.state.selected}/>
+          </div>
+      );
+
     }
 
     copy() {
