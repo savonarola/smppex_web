@@ -13,7 +13,7 @@ config :logger, backends: [{LoggerFileBackend, :info_log}]
 config :logger, :info_log,
   path: "log/info.log",
   level: :info,
-  format: "[$level] $message\n"
+  format: "$date $time [$level] $message\n"
 
 config :smppex_web, SmppexWeb.MC,
   port: 2775,
