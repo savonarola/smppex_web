@@ -7,8 +7,9 @@ RELEASE=$2
 
 if [ "x$BRANCH" == "x" ]
 then
-    echo "Using default branch: master"
     BRANCH=master
+    echo "Using default branch: $BRANCH"
+
 fi
 
 if [ "x$RELEASE" == "x" ]

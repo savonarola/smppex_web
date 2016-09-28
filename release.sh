@@ -17,7 +17,7 @@ then
     exit 1
 fi
 
-RELEASE_DIR=releases/$1
+RELEASE_DIR=releases/$RELEASE
 REMOTE=git@github.com:savonarola/smppex_web.git
 IMAGE_TAG=smppex_web
 
@@ -36,5 +36,3 @@ docker run -v $CWD/$RELEASE_DIR:/smppex_web -w /smppex_web $IMAGE_TAG /bin/bash 
 rm -rf $RELEASE_DIR/smppex_web.git
 rm $RELEASE_DIR/prod.secret.exs
 rm $RELEASE_DIR/build.sh
-
-

@@ -124,4 +124,3 @@ export class History extends React.Component {
     }
 
 }
-
