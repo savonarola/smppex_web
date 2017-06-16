@@ -12,13 +12,13 @@ defmodule SmppexWeb.MCTest do
   end
 
   def connect do
-    wait
+    wait()
     {:ok, esme} = ESME.start_link("localhost", Application.get_env(:smppex_web, SmppexWeb.MC)[:port])
     esme
   end
 
   test "bind" do
-    esme = connect
+    esme = connect()
     {:ok, bind_resp} = ESME.request(esme, Factory.bind_transmitter("system_id", "pass"))
 
     assert Pdu.success_resp?(bind_resp)
@@ -26,32 +26,32 @@ defmodule SmppexWeb.MCTest do
   end
 
   test "unbind" do
-    esme = connect
+    esme = connect()
     {:ok, bind_resp} = ESME.request(esme, Factory.bind_transmitter("system_id1", "pass"))
 
     assert Pdu.success_resp?(bind_resp)
 
     ESME.stop(esme)
 
-    wait
+    wait()
 
     assert PduHistory.system_ids == []
   end
 
   test "bind with same system_id" do
-    esme1 = connect
+    esme1 = connect()
     {:ok, bind_resp1} = ESME.request(esme1, Factory.bind_transmitter("system_id2", "pass"))
 
     assert Pdu.success_resp?(bind_resp1)
 
-    esme2 = connect
+    esme2 = connect()
     {:ok, bind_resp2} = ESME.request(esme2, Factory.bind_transmitter("system_id2", "pass"))
 
     refute Pdu.success_resp?(bind_resp2)
   end
 
   test "submit_sm" do
-    esme = connect
+    esme = connect()
     {:ok, _} = ESME.request(esme, Factory.bind_transmitter("system_id3", "pass"))
 
     {:ok, submit_sm_resp} = ESME.request(esme, Factory.submit_sm({"from", 1, 1}, {"to", 1, 1}, "hello"))
@@ -60,7 +60,7 @@ defmodule SmppexWeb.MCTest do
   end
 
   test "system_id history" do
-    esme = connect
+    esme = connect()
     {:ok, _} = ESME.request(esme, Factory.bind_transmitter("system_id4", "pass"))
 
     submit_sm = Factory.submit_sm({"from", 1, 1}, {"to", 1, 1}, "hello")

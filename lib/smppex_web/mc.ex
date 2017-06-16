@@ -64,7 +64,7 @@ defmodule SmppexWeb.MC do
     end
   end
 
-  defp reply_bind(pdu, status), do: MC.reply(self, pdu, bind_resp(pdu, status))
+  defp reply_bind(pdu, status), do: MC.reply(self(), pdu, bind_resp(pdu, status))
 
   defp bind_resp(pdu, command_status) do
     Factory.bind_resp(
@@ -78,7 +78,7 @@ defmodule SmppexWeb.MC do
 
   def do_handle_enquire_link(pdu, st) do
     do_save_pdu({:in, pdu})
-    MC.reply(self, pdu, Factory.enquire_link_resp)
+    MC.reply(self(), pdu, Factory.enquire_link_resp)
     st
   end
 
@@ -88,12 +88,12 @@ defmodule SmppexWeb.MC do
       code = Errors.code_by_name(:ROK)
       msg_id = st[:last_msg_id] + 1
       resp = Factory.submit_sm_resp(code, to_string(msg_id))
-      MC.reply(self, pdu, resp)
+      MC.reply(self(), pdu, resp)
       %{st | last_msg_id: msg_id}
     else
       code = Errors.code_by_name(:RINVBNDSTS)
       resp = Factory.submit_sm_resp(code)
-      MC.reply(self, pdu, resp)
+      MC.reply(self(), pdu, resp)
       st
     end
   end
