@@ -36,6 +36,7 @@ defmodule SmppexWeb.MC do
       :bind_transceiver -> do_handle_bind(pdu, st)
       :submit_sm -> do_handle_submit_sm(pdu, st)
       :enquire_link -> do_handle_enquire_link(pdu, st)
+      :unbind -> do_handle_unbind(pdu, st)
       _ -> st
     end
     new_st
@@ -102,4 +103,18 @@ defmodule SmppexWeb.MC do
     PduHistory.register_pdu(pdu_info)
   end
 
+  def do_handle_unbind(pdu, st) do
+    if st[:bound] do
+      do_save_pdu({:in, pdu})
+      resp = Factory.unbind_resp
+      MC.reply(self(), pdu, resp)
+      MC.stop(self())
+      st
+    else
+      code = Errors.code_by_name(:RINVBNDSTS)
+      resp = Factory.submit_sm_resp(code)
+      MC.reply(self(), pdu, resp)
+      st
+    end
+  end
 end
