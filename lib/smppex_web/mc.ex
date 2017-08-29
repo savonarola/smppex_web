@@ -1,11 +1,11 @@
 defmodule SmppexWeb.MC do
 
-  use SMPPEX.MC
-  alias SMPPEX.MC
+  use SMPPEX.Session
 
   alias SMPPEX.Pdu
   alias SMPPEX.Pdu.Factory
   alias SMPPEX.Pdu.Errors
+  alias SMPPEX.Session
   alias SmppexWeb.PduHistory
 
   @system_id "smppex_web"
@@ -26,20 +26,19 @@ defmodule SmppexWeb.MC do
 
   def handle_resp(pdu, _original_pdu, st) do
     do_save_pdu({:in, pdu})
-    st
+    {:ok, st}
   end
 
   def handle_pdu(pdu, st) do
-    new_st = case Pdu.command_name(pdu) do
+    case Pdu.command_name(pdu) do
       :bind_transmitter -> do_handle_bind(pdu, st)
       :bind_receiver -> do_handle_bind(pdu, st)
       :bind_transceiver -> do_handle_bind(pdu, st)
       :submit_sm -> do_handle_submit_sm(pdu, st)
       :enquire_link -> do_handle_enquire_link(pdu, st)
       :unbind -> do_handle_unbind(pdu, st)
-      _ -> st
+      _ -> {:ok, st}
     end
-    new_st
   end
 
   def handle_send_pdu_result(pdu, _send_pdu_result, st) do
@@ -47,55 +46,54 @@ defmodule SmppexWeb.MC do
     st
   end
 
-  def do_handle_bind(pdu, st) do
+  def handle_cast(:stop, st) do
+    {:stop, :normal, st}
+  end
+
+  # Private
+
+  defp do_handle_bind(pdu, st) do
     if st[:bound] do
-      reply_bind(pdu, :ROK)
-      st
+      {:ok, [bind_resp(pdu, :ROK)], st}
     else
       system_id = Pdu.field(pdu, :system_id)
       case PduHistory.register_session(system_id) do
         :ok ->
           do_save_pdu({:in, pdu})
-          reply_bind(pdu, :ROK)
-          %{ st | bound: true }
+          {:ok, [bind_resp(pdu, :ROK)], %{st | bound: true}}
         {:error, _} ->
-          reply_bind(pdu, :RALYBND)
-          st
+          {:ok, [bind_resp(pdu, :RALYBND)], st}
       end
     end
   end
-
-  defp reply_bind(pdu, status), do: MC.reply(self(), pdu, bind_resp(pdu, status))
 
   defp bind_resp(pdu, command_status) do
     Factory.bind_resp(
       bind_resp_command_id(pdu),
       Errors.code_by_name(command_status),
       @system_id
-    )
+    ) |> Pdu.as_reply_to(pdu)
   end
 
   defp bind_resp_command_id(pdu), do: 0x80000000 + Pdu.command_id(pdu)
 
-  def do_handle_enquire_link(pdu, st) do
+  defp do_handle_enquire_link(pdu, st) do
     do_save_pdu({:in, pdu})
-    MC.reply(self(), pdu, Factory.enquire_link_resp)
-    st
+    resp = Factory.enquire_link_resp |> Pdu.as_reply_to(pdu)
+    {:ok, [resp], st}
   end
 
-  def do_handle_submit_sm(pdu, st) do
+  defp do_handle_submit_sm(pdu, st) do
     if st[:bound] do
       do_save_pdu({:in, pdu})
       code = Errors.code_by_name(:ROK)
       msg_id = st[:last_msg_id] + 1
-      resp = Factory.submit_sm_resp(code, to_string(msg_id))
-      MC.reply(self(), pdu, resp)
-      %{st | last_msg_id: msg_id}
+      resp = Factory.submit_sm_resp(code, to_string(msg_id)) |> Pdu.as_reply_to(pdu)
+      {:ok, [resp], %{st | last_msg_id: msg_id}}
     else
       code = Errors.code_by_name(:RINVBNDSTS)
-      resp = Factory.submit_sm_resp(code)
-      MC.reply(self(), pdu, resp)
-      st
+      resp = Factory.submit_sm_resp(code) |> Pdu.as_reply_to(pdu)
+      {:ok, [resp], st}
     end
   end
 
@@ -103,18 +101,20 @@ defmodule SmppexWeb.MC do
     PduHistory.register_pdu(pdu_info)
   end
 
-  def do_handle_unbind(pdu, st) do
+  defp do_handle_unbind(pdu, st) do
     if st[:bound] do
       do_save_pdu({:in, pdu})
-      resp = Factory.unbind_resp
-      MC.reply(self(), pdu, resp)
-      MC.stop(self())
-      st
+      resp = Factory.unbind_resp |> Pdu.as_reply_to(pdu)
+      stop()
+      {:ok, [resp], st}
     else
       code = Errors.code_by_name(:RINVBNDSTS)
-      resp = Factory.submit_sm_resp(code)
-      MC.reply(self(), pdu, resp)
-      st
+      resp = Factory.unbind_resp(code) |> Pdu.as_reply_to(pdu)
+      {:ok, [resp], st}
     end
+  end
+
+  defp stop do
+    Session.cast(self(), :stop)
   end
 end

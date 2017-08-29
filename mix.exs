@@ -36,7 +36,7 @@ defmodule SmppexWeb.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_html, "~> 2.6"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
-      {:smppex, "~> 0.3.0"}
+      {:smppex, "~> 2.0.0"}
     ]
   end
 end

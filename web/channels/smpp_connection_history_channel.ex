@@ -35,4 +35,3 @@ defmodule SmppexWeb.SmppConnectionHistoryChannel do
   end
 
 end
-
