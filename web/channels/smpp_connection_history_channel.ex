@@ -18,7 +18,7 @@ defmodule SmppexWeb.SmppConnectionHistoryChannel do
     end
   end
 
-  defp to_maps({id, time, {direction, pdu}}) do
+  def to_maps({id, time, {direction, pdu}}) do
     %{
       id: id,
       time: time,
@@ -28,10 +28,14 @@ defmodule SmppexWeb.SmppConnectionHistoryChannel do
         command_id: Pdu.command_id(pdu),
         command_status: Pdu.command_status(pdu),
         sequence_number: Pdu.sequence_number(pdu),
-        mandatory_fields: Pdu.mandatory_fields(pdu),
-        optional_fields: Pdu.optional_fields(pdu)
+        mandatory_fields: pdu |> Pdu.mandatory_fields |> stringify_keys,
+        optional_fields: pdu |> Pdu.optional_fields |> stringify_keys
       }
     }
+  end
+
+  defp stringify_keys(map) do
+    Enum.into(map, %{}, fn {k, v} -> {to_string(k), v} end)
   end
 
 end
