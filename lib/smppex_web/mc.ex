@@ -35,7 +35,6 @@ defmodule SmppexWeb.MC do
       :bind_receiver -> do_handle_bind(pdu, st)
       :bind_transceiver -> do_handle_bind(pdu, st)
       :submit_sm -> do_handle_submit_sm(pdu, st)
-      :enquire_link -> do_handle_enquire_link(pdu, st)
       :unbind -> do_handle_unbind(pdu, st)
       _ -> {:ok, st}
     end
@@ -76,12 +75,6 @@ defmodule SmppexWeb.MC do
   end
 
   defp bind_resp_command_id(pdu), do: 0x80000000 + Pdu.command_id(pdu)
-
-  defp do_handle_enquire_link(pdu, st) do
-    do_save_pdu({:in, pdu})
-    resp = Factory.enquire_link_resp |> Pdu.as_reply_to(pdu)
-    {:ok, [resp], st}
-  end
 
   defp do_handle_submit_sm(pdu, st) do
     if st[:bound] do
