@@ -20,7 +20,7 @@
     "brunch": "2.7.4",
     "clean-css-brunch": "~2.0.0",
     "css-brunch": "~2.0.0",
-    "eslint": "^3.5.0",
+    "eslint": ">=4.18.2",
     "eslint-plugin-react": "^6.3.0",
     "javascript-brunch": "~2.0.0",
     "uglify-js-brunch": "~2.0.1"
