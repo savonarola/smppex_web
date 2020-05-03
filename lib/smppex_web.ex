@@ -7,6 +7,7 @@ defmodule SmppexWeb do
     SmppexWeb.MC.start
 
     children = [
+      {Phoenix.PubSub, [name: SmppexWeb.PubSub, adapter: Phoenix.PubSub.PG2]},
       worker(SmppexWeb.PduHistory, [
         &SmppexWeb.SmppConnectionsChannel.broadcast_update/1,
         &SmppexWeb.SmppConnectionHistoryChannel.broadcast_update/1,

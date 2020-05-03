@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :smppex_web, SmppexWeb.Endpoint,
   http: [port: 4000],

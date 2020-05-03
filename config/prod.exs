@@ -1,19 +1,18 @@
-use Mix.Config
+import Config
 
 config :smppex_web, SmppexWeb.Endpoint,
   http: [port: 8080],
-  url: [host: "smppex.rubybox.ru", port: 80],
-  cache_static_manifest: "priv/static/manifest.json"
+  code_reloader: false,
+  server: true,
+  url: [host: "smppex.rubybox.ru", scheme: "https", port: 443],
+  cache_static_manifest: "priv/static/cache_manifest.json",
+  check_origin: [
+    "https://smppex.rubybox.ru",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080"
+  ]
 
 config :logger, level: :info
-
-import_config "prod.secret.exs"
-
-config :logger, backends: [{LoggerFileBackend, :info_log}]
-config :logger, :info_log,
-  path: "log/info.log",
-  level: :info,
-  format: "$date $time [$level] $message\n"
 
 config :smppex_web, SmppexWeb.MC,
   port: 2775,

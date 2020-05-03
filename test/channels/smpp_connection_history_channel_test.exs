@@ -11,7 +11,7 @@ defmodule SmppexWeb.SmppConnectionHistoryChannelTest do
     |> Pdu.set_optional_field(3333, "hello")
 
     record = {123, :erlang.system_time(:milli_seconds), {:in, pdu}}
-    assert is_binary(record |> Channel.to_maps |> Poison.encode!)
+    assert is_binary(record |> Channel.to_maps |> Jason.encode!)
   end
 
 end

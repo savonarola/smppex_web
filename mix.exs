@@ -9,15 +9,28 @@ defmodule SmppexWeb.Mixfile do
      compilers: [:phoenix, :gettext] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     releases: releases(),
      deps: deps()]
+  end
+
+  def releases do
+    [
+      main: [
+        applications: [
+          smppex_web: :permanent
+        ]
+      ]
+    ]
   end
 
   # Configuration for the OTP application.
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [mod: {SmppexWeb, []},
-     applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext, :smppex]]
+    [
+      mod: {SmppexWeb, []},
+      extra_applications: [:logger, :runtime_tools]
+    ]
   end
 
   # Specifies which paths to compile per environment.
@@ -29,13 +42,13 @@ defmodule SmppexWeb.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:cowboy, "~> 1.0"},
-      {:gettext, "~> 0.11"},
-      {:logger_file_backend, "~> 0.0.9"},
-      {:phoenix, "~> 1.2.1"},
-      {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_html, "~> 2.6"},
-      {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:phoenix, "~> 1.5.0", override: true},
+      {:phoenix_html, "~> 2.11"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:phoenix_pubsub, "~> 2.0"},
+      {:jason, "~> 1.0"},
+      {:plug_cowboy, "~> 2.0"},
+      {:gettext, ">= 0.0.0"},
       {:smppex, "~> 2.0"}
     ]
   end

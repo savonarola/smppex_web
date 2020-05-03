@@ -5,9 +5,6 @@ defmodule SmppexWeb.UserSocket do
   channel "smppConnections:list", SmppexWeb.SmppConnectionsChannel
   channel "smppConnectionHistory:*", SmppexWeb.SmppConnectionHistoryChannel
 
-  ## Transports
-  transport :websocket, Phoenix.Transports.WebSocket
-
   def connect(_params, socket) do
     {:ok, socket}
   end
