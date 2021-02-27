@@ -16,7 +16,7 @@ RUN apt-get install -y elixir=1.10.3-1
 RUN mix local.rebar --force
 RUN mix local.hex --force
 
-RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
 
 ENV MIX_ENV=prod
