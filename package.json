@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "babel-preset-react": "^6.11.1",
-    "moment": "^2.25.1",
+    "moment": "^2.29.2",
     "phoenix": "file:deps/phoenix",
     "phoenix_html": "file:deps/phoenix_html",
     "react": "^15.3.2",
