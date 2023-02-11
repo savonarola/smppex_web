@@ -9,5 +9,8 @@ tag: build
 push: tag
 	docker push cr.yandex/crpj428ot3ll9595ju8d/smppex_web
 
+deploy: push
+	ssh rubybox.dev microk8s.kubectl rollout restart deployment/smppexweb-web
+
 run: build
 	docker run -p 8080:8080 -p 2775:2775 --env-file config/docker.env smppex_web
