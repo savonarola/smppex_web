@@ -8,7 +8,7 @@
     <meta name="author" content="Averyanov Ilya">
 
     <title>SMPPEX Live Demo</title>
-    <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" href="<%= static_path(@conn, "/js/app.css") %>">
   </head>
 
   <body>

@@ -1,37 +1,29 @@
-FROM ubuntu:xenial AS build
+FROM elixir:1.11 AS build
 
-MAINTAINER Ilya Averyanov <ilya@averyanov.org>
+MAINTAINER Ilya Averyanov <av@rubybox.dev>
 
 ENV LANG=en_US.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update
-RUN apt-get install -y wget locales
-RUN locale-gen $LANG
-RUN wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-RUN dpkg -i erlang-solutions_1.0_all.deb
-RUN apt-get update
-RUN apt-get install -y curl git unzip make
-RUN apt-get install -y esl-erlang=1:22.3.3-1
-RUN apt-get install -y elixir=1.10.3-1
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get install -y nodejs
 RUN mix local.rebar --force
 RUN mix local.hex --force
-
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
 
 ENV MIX_ENV=prod
 
 COPY . /app
 WORKDIR /app
 
+RUN rm -df deps
 RUN mix deps.get --only prod
 RUN mix compile
 RUN npm install
-RUN node_modules/brunch/bin/brunch build --production
+RUN node_modules/esbuild/bin/esbuild web/static/js/app.js --bundle --loader:.js=jsx --loader:.eot=copy --loader:.svg=copy --loader:.ttf=copy --loader:.woff2=copy --loader:.woff=copy --outfile=priv/static/js/app.js
 RUN mix phx.digest
 RUN mix release main --overwrite
 
-FROM ubuntu:xenial AS app
+FROM ubuntu:focal AS app
 
 RUN apt-get update
 RUN apt-get install -y openssl locales
