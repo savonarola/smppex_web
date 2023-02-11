@@ -63,13 +63,13 @@ export class SystemIds extends React.Component {
         if(this.sessionsPresent()) {
             return (
                 <span>
-                    Select one of the SMPP sessions below to watch its realtime PDU log or establish a new SMPP session by connecting to <code>smppex.rubybox.ru:2775</code> and binding in any mode with any credentials
+                    Select one of the SMPP sessions below to watch its realtime PDU log or establish a new SMPP session by connecting to <code>smppex.rubybox.dev:2775</code> and binding in any mode with any credentials
                 </span>
             );
         } else {
             return (
                 <span>
-                    No SMPP sessions established. You may establish a new SMPP session by connecting to <code>smppex.rubybox.ru:2775</code> and binding in any mode with any credentials
+                    No SMPP sessions established. You may establish a new SMPP session by connecting to <code>smppex.rubybox.dev:2775</code> and binding in any mode with any credentials
                 </span>
             );
         }

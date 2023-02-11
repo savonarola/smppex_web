@@ -2,7 +2,7 @@
 
 SmppexWeb is a simple demonstrational MC (SMPP server) with
 simple web interface.
-A public installation is available online at [smppex.rubybox.ru](http://smppex.rubybox.ru/).
+A public installation is available online at [smppex.rubybox.dev](http://smppex.rubybox.dev/).
 
 ## Installation
 
