@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "build": "npm run build:js && npm run build:css",
+    "build:css": "BROWSERSLIST_IGNORE_OLD_DATA=true tailwindcss -i css/app.css -o ../priv/static/assets/app.css --minify",
+    "build:js": "esbuild js/app.js --bundle --minify --outdir=../priv/static/assets",
+    "watch:css": "BROWSERSLIST_IGNORE_OLD_DATA=true tailwindcss -i css/app.css -o ../priv/static/assets/app.css --watch",
+    "watch:js": "esbuild js/app.js --bundle --sourcemap --outdir=../priv/static/assets --watch=forever"
+  },
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.19",
+    "alpinejs": "^3.15.0",
+    "daisyui": "^4.12.24",
+    "phoenix": "^1.7.24"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.11",
+    "tailwindcss": "^3.4.18"
+  }
+}

@@ -1,0 +1,205 @@
+<div x-data="smppApp()" x-init="init()">
+  <div class="navbar bg-base-200 rounded-box mb-4">
+    <div class="navbar-start">
+      <span class="text-xl font-bold px-2">SMPPEX Live Demo</span>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <div
+      x-show="systemIds.length === 0"
+      class="alert bg-base-200 border-base-300 text-base-content"
+    >
+      <span>
+        No SMPP sessions established. You may establish a new SMPP session by connecting to
+        <code class="badge badge-outline">smppex.rubybox.dev:2775</code>
+        and binding in any mode with any credentials.
+      </span>
+    </div>
+    <div x-show="systemIds.length > 0" class="alert bg-base-200 border-base-300 text-base-content">
+      <span>
+        Select one of the SMPP sessions below to watch its realtime PDU log or establish a new SMPP session by connecting to
+        <code class="badge badge-outline">smppex.rubybox.dev:2775</code>
+        and binding in any mode with any credentials.
+      </span>
+    </div>
+  </div>
+
+  <section
+    class="mb-6 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm"
+    x-show="systemIds.length > 0"
+  >
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60">
+          Connected SMPP sessions
+        </h2>
+        <p class="text-sm text-base-content/50">
+          Select a system ID to inspect its realtime PDU history.
+        </p>
+      </div>
+      <span
+        class="badge badge-outline"
+        x-text="systemIds.length + (systemIds.length === 1 ? ' session' : ' sessions')"
+      >
+      </span>
+    </div>
+
+    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <template x-for="sid in systemIds">
+        <button
+          type="button"
+          class="rounded-box border p-3 text-left transition hover:border-primary hover:bg-primary/5"
+          x-bind:class="selectedSystemId === sid ? 'border-primary bg-primary/10 shadow-sm' : 'border-base-300 bg-base-200'"
+          x-on:click="selectSession(sid)"
+        >
+          <span class="block text-xs font-semibold uppercase tracking-wide text-base-content/50">
+            System ID
+          </span>
+          <span class="mt-1 block truncate font-mono text-lg font-bold" x-text="sid"></span>
+        </button>
+      </template>
+    </div>
+  </section>
+
+  <div x-show="selectedSystemId" class="space-y-2">
+    <div class="mb-2 flex flex-wrap items-end justify-between gap-2">
+      <div>
+        <div class="text-sm font-semibold uppercase tracking-wide text-base-content/50">
+          Selected session
+        </div>
+        <h2 class="text-3xl font-bold" x-text="selectedSystemId"></h2>
+      </div>
+      <span
+        class="badge badge-outline"
+        x-text="history.length + (history.length === 1 ? ' PDU' : ' PDUs')"
+      >
+      </span>
+    </div>
+    <template x-for="pdu in history">
+      <div class="rounded-box bg-base-200">
+        <button
+          type="button"
+          class="grid w-full grid-cols-[auto_minmax(0,1fr)_max-content_auto] items-center gap-3 p-4 text-left"
+          x-on:click="togglePdu(pdu.id)"
+          x-bind:aria-expanded="isPduOpen(pdu.id)"
+        >
+          <span
+            class="badge"
+            x-bind:class="pdu.direction === 'in' ? 'badge-success' : 'badge-primary'"
+            x-text="pdu.direction"
+          >
+          </span>
+          <span class="min-w-0 truncate font-mono text-lg font-bold" x-text="pdu.pdu.command_name">
+          </span>
+          <span
+            class="whitespace-nowrap font-mono text-sm opacity-70"
+            x-text="formatTime(pdu.time)"
+          >
+          </span>
+          <span
+            class="text-xl transition-transform"
+            x-bind:class="isPduOpen(pdu.id) ? 'rotate-180' : ''"
+            aria-hidden="true"
+          >
+            ⌄
+          </span>
+        </button>
+        <div class="border-t border-base-300/70 px-4 pb-4 pt-4" x-show="isPduOpen(pdu.id)" x-cloak>
+          <div class="grid gap-3 md:grid-cols-3">
+            <div class="rounded-box border border-base-300 bg-base-100 p-3 shadow-sm">
+              <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50">
+                Command ID
+              </div>
+              <div class="mt-1 font-mono text-sm" x-text="formatCommandId(pdu.pdu.command_id)">
+              </div>
+            </div>
+            <div class="rounded-box border border-base-300 bg-base-100 p-3 shadow-sm">
+              <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50">
+                Status
+              </div>
+              <div class="mt-1 flex items-center gap-2">
+                <span
+                  class="badge badge-sm"
+                  x-bind:class="pdu.pdu.command_status === 0 ? 'badge-success' : 'badge-error'"
+                  x-text="pdu.pdu.command_status === 0 ? 'OK' : 'ERROR'"
+                >
+                </span>
+                <span class="font-mono text-sm" x-text="pdu.pdu.command_status"></span>
+              </div>
+            </div>
+            <div class="rounded-box border border-base-300 bg-base-100 p-3 shadow-sm">
+              <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50">
+                Sequence
+              </div>
+              <div class="mt-1 font-mono text-sm" x-text="pdu.pdu.sequence_number"></div>
+            </div>
+          </div>
+
+          <section class="mt-4" x-show="!isEmpty(pdu.pdu.mandatory_fields)">
+            <div class="mb-2 flex items-center gap-2">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-base-content/60">
+                Mandatory fields
+              </h3>
+              <span
+                class="badge badge-outline badge-sm"
+                x-text="fieldEntries(pdu.pdu.mandatory_fields).length"
+              >
+              </span>
+            </div>
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <template x-for="field in fieldEntries(pdu.pdu.mandatory_fields)">
+                <div class="rounded-box border border-base-300 bg-base-100 p-3 shadow-sm">
+                  <div
+                    class="mb-2 font-mono text-xs font-semibold uppercase tracking-wide text-base-content/50"
+                    x-text="formatFieldName(field[0])"
+                  >
+                  </div>
+                  <pre
+                    class="min-h-10 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-base-200 p-2 text-sm"
+                    x-show="hasValue(field[1])"
+                  ><code x-text="formatValue(field[1])"></code></pre>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <section class="mt-4" x-show="!isEmpty(pdu.pdu.optional_fields)">
+            <div class="mb-2 flex items-center gap-2">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-base-content/60">
+                Optional fields
+              </h3>
+              <span
+                class="badge badge-outline badge-sm"
+                x-text="fieldEntries(pdu.pdu.optional_fields).length"
+              >
+              </span>
+            </div>
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <template x-for="field in fieldEntries(pdu.pdu.optional_fields)">
+                <div class="rounded-box border border-base-300 bg-base-100 p-3 shadow-sm">
+                  <div
+                    class="mb-2 font-mono text-xs font-semibold uppercase tracking-wide text-base-content/50"
+                    x-text="formatFieldName(field[0])"
+                  >
+                  </div>
+                  <pre
+                    class="min-h-10 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-base-200 p-2 text-sm"
+                    x-show="hasValue(field[1])"
+                  ><code x-text="formatValue(field[1])"></code></pre>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <div
+            class="mt-4 rounded-box border border-dashed border-base-300 bg-base-100 p-4 text-sm text-base-content/50"
+            x-show="isEmpty(pdu.pdu.mandatory_fields) && isEmpty(pdu.pdu.optional_fields)"
+          >
+            This PDU has no mandatory or optional body fields.
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
