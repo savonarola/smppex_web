@@ -1,5 +1,4 @@
 defmodule SmppexWeb.MC do
-
   use SMPPEX.Session
 
   alias SMPPEX.Pdu
@@ -14,14 +13,22 @@ defmodule SmppexWeb.MC do
     config = Application.get_env(:smppex_web, __MODULE__)
     port = config[:port]
     max_connections = config[:max_connections]
-    {:ok, _ref} = SMPPEX.MC.start({__MODULE__, []}, [transport_opts: [port: port, max_connections: max_connections]])
+
+    {:ok, _ref} =
+      SMPPEX.MC.start({__MODULE__, []},
+        transport_opts: %{
+          socket_opts: [port: port],
+          max_connections: max_connections
+        }
+      )
   end
 
   def init(_socket, _transport, []) do
-    {:ok, %{
-      bound: false,
-      last_msg_id: 1,
-    }}
+    {:ok,
+     %{
+       bound: false,
+       last_msg_id: 1
+     }}
   end
 
   def handle_resp(pdu, _original_pdu, st) do
@@ -56,10 +63,12 @@ defmodule SmppexWeb.MC do
       {:ok, [bind_resp(pdu, :ROK)], st}
     else
       system_id = Pdu.field(pdu, :system_id)
+
       case PduHistory.register_session(system_id) do
         :ok ->
           do_save_pdu({:in, pdu})
           {:ok, [bind_resp(pdu, :ROK)], %{st | bound: true}}
+
         {:error, _} ->
           {:ok, [bind_resp(pdu, :RALYBND)], st}
       end
@@ -71,7 +80,8 @@ defmodule SmppexWeb.MC do
       bind_resp_command_id(pdu),
       Errors.code_by_name(command_status),
       @system_id
-    ) |> Pdu.as_reply_to(pdu)
+    )
+    |> Pdu.as_reply_to(pdu)
   end
 
   defp bind_resp_command_id(pdu), do: 0x80000000 + Pdu.command_id(pdu)
@@ -97,7 +107,7 @@ defmodule SmppexWeb.MC do
   defp do_handle_unbind(pdu, st) do
     if st[:bound] do
       do_save_pdu({:in, pdu})
-      resp = Factory.unbind_resp |> Pdu.as_reply_to(pdu)
+      resp = Factory.unbind_resp() |> Pdu.as_reply_to(pdu)
       stop()
       {:ok, [resp], st}
     else

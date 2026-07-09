@@ -13,4 +13,4 @@ deploy: push
 	ssh rubybox.dev microk8s.kubectl rollout restart deployment/smppexweb-web
 
 run: build
-	docker run -p 8080:8080 -p 2775:2775 --env-file config/docker.env smppex_web
+	docker run -p 8080:8080 -p 2775:2775 --env-file config/docker.dev.env smppex_web

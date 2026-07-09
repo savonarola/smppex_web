@@ -1,27 +1,74 @@
 defmodule SmppexWeb do
-  use Application
+  @moduledoc """
+  The entrypoint for defining your web interface, such
+  as controllers, components, channels and so on.
 
-  def start(_type, _args) do
-    import Supervisor.Spec
+  This can be used in your application as:
 
-    SmppexWeb.MC.start
+      use SmppexWeb, :controller
+      use SmppexWeb, :html
 
-    children = [
-      {Phoenix.PubSub, [name: SmppexWeb.PubSub, adapter: Phoenix.PubSub.PG2]},
-      worker(SmppexWeb.PduHistory, [
-        &SmppexWeb.SmppConnectionsChannel.broadcast_update/1,
-        &SmppexWeb.SmppConnectionHistoryChannel.broadcast_update/1,
-        [name: SmppexWeb.PduHistory]
-      ]),
-      supervisor(SmppexWeb.Endpoint, []),
-    ]
+  The definitions below will be executed for every controller,
+  component, etc, so keep them short and clean, focused
+  on imports, uses and aliases.
 
-    opts = [strategy: :one_for_one, name: SmppexWeb.Supervisor]
-    Supervisor.start_link(children, opts)
+  Do NOT define functions inside the quoted expressions
+  below. Instead, define additional modules and import
+  those modules here.
+  """
+
+  def static_paths, do: ~w(assets css fonts images js favicon.ico robots.txt)
+
+  def router do
+    quote do
+      use Phoenix.Router, helpers: false
+
+      import Plug.Conn
+      import Phoenix.Controller
+      import Phoenix.LiveView.Router
+    end
   end
 
-  def config_change(changed, _new, removed) do
-    SmppexWeb.Endpoint.config_change(changed, removed)
-    :ok
+  def channel do
+    quote do
+      use Phoenix.Channel
+    end
+  end
+
+  def controller do
+    quote do
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: {SmppexWeb.Layouts, :root}]
+
+      import Plug.Conn
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      import Phoenix.HTML
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: SmppexWeb.Endpoint,
+        router: SmppexWeb.Router,
+        statics: SmppexWeb.static_paths()
+    end
+  end
+
+  @doc """
+  When used, dispatch to the appropriate controller/view/etc.
+  """
+  defmacro __using__(which) when is_atom(which) do
+    apply(__MODULE__, which, [])
   end
 end

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="SMPPEX Live Demo" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <title>SMPPEX Live Demo</title>
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body class="bg-base-100 text-base-content min-h-screen flex flex-col">
+    <main class="container mx-auto p-4 flex-grow">
+      <%= @inner_content %>
+    </main>
+    <footer class="p-4 text-base-content/60 text-center text-sm">
+      <a href="https://github.com/savonarola/smppex" class="link">SMPPEX</a>
+      is released under the
+      <a href="https://opensource.org/licenses/MIT" class="link">MIT License</a>
+      — Copyright © <%= DateTime.utc_now().year %>
+    </footer>
+    <script defer src="/assets/app.js">
+    </script>
+  </body>
+</html>
